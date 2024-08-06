@@ -1,0 +1,19 @@
+<!-- <p>users-list works!</p> -->
+<div class="user__main">
+    <app-header></app-header>
+    <div *ngIf="dialogOpen">
+        <app-add-user-dialog></app-add-user-dialog>
+    </div>
+    <button class="btn_add" mat-flat-button color="primary" (click)="openAddUserDialog()">
+        Добавить пользователя
+    </button>
+    <div class="users__list">
+        <div *ngFor="let user of users$ | async">
+            <app-users-card [user]="user" 
+                (deleteUserEvent)="onDeleteUser($event)"
+                (click)="openDialogWithCard(user)">
+            </app-users-card>
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>

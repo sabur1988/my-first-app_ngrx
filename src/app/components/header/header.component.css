@@ -1,0 +1,11 @@
+.header{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    background-color: rgb(65, 98, 183);
+    color: white;
+    padding-top: 10px;
+}
+h1{
+    font-size: 20px;
+}

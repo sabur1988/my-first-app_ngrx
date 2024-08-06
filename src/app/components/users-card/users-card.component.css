@@ -1,0 +1,14 @@
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 300px;
+    border: 3px solid #556d9c;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 5px;
+    background-color: rgb(128, 193, 209);
+}
+.btnDelete{
+    margin-top: 10px;
+}

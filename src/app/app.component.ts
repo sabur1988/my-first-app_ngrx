@@ -1,13 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ITodo } from './core/models/ITodo.model';
-import { TodoService } from './core/services/todo.service';
-import { Subject, takeUntil } from 'rxjs';
-import { AuthState } from './core/services/auth.state';
-
-
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { UsersListComponent } from './components/users-list/users-list.component';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, UsersListComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })

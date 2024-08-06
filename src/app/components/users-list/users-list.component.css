@@ -1,0 +1,17 @@
+.users__list{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: auto;
+}
+.btn_add{
+    margin: 15px 20px;
+    height: 50px;
+    width: 150px;
+}
+.user__main{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
