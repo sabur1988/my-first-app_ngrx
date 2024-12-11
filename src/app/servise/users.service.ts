@@ -1,59 +1,57 @@
-import { Injectable } from '@angular/core';
-import { User } from '../types/user.models';
-import { UsersApiService } from './users-api-service.service';
-import { BehaviorSubject } from 'rxjs';
+// import { Injectable } from '@angular/core';
+// import { User } from '../types/user.models';
+// import { UsersApiService } from './users-api-service.service';
+// import { BehaviorSubject } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class UsersService {
-  private _users$ = new BehaviorSubject<User[]>([]);// реактивное состояние
-  public readonly users$ = this._users$.asObservable(); //только для чтения
+// @Injectable({
+//   providedIn: 'root'
+// })
+// export class UsersService {
+//   private _users$ = new BehaviorSubject<User[]>([]); // реактивное состояние
+//   public readonly users$ = this._users$.asObservable(); // только для чтения
 
-  constructor(private usersApiService: UsersApiService) { }
+//   constructor(private usersApiService: UsersApiService) {}
 
-  //получение массива юзеров
-  get users(): User[] {
-    return this._users$.getValue();
-  }
+//   // Получение массива пользователей
+//   get users(): User[] {
+//     return this._users$.getValue();
+//   }
 
-  //инициализация юзеров
-  set users(users: User[]) {
-    this._users$.next(users);
-  }
+//   // Установка массива пользователей
+//   set users(users: User[]) {
+//     this._users$.next(users);
+//   }
 
-  setUsers(users: User[]) {
-    this.users = users;
-  }
+//   setUsers(users: User[]): void {
+//     this.users = users;
+//   }
 
-  //удаляем юзеров
-  deleteUser(id: number): void {
-    this._users$.next(this._users$.value.filter(user => user.id !== id));
-  }
+//   // Обновление данных пользователя
+//   editUser(editedUser: User): void {
+//     const users = this._users$.getValue(); // Получаем текущий массив пользователей
+//     const userIndex = users.findIndex(user => user.id === editedUser.id);
+  
+//     if (userIndex !== -1) {
+//       // Если пользователь найден, обновляем его данные
+//       users[userIndex] = { ...users[userIndex], ...editedUser };
+  
+//       // Сохраняем обновлённый массив
+//       this.setUsers(users);
+//     } else {
+//       console.error(`Пользователь с ID ${editedUser.id} не найден`);
+//     }
+//   }
 
-  //добавляем юзера
-  addUser(userData: User){
-    const newUsers = [...this._users$.value, userData];
-    this._users$.next(newUsers);
-  }
+//   // Добавление пользователя
+//   createUser(userData: User): void {
+//     const newUsers = [...this._users$.getValue(), userData];
+//     this.setUsers(newUsers);
+//   }
 
-  //изменение юзера
-  updateUser(updatedUser: User): void {
-    const updatedUsers = this._users$.value.map(user => {
-      if (user.id === updatedUser.id) {
-        return { ...user, 
-          name: updatedUser.name,
-          username: updatedUser.username,
-          email: updatedUser.email,
-          phone: updatedUser.phone
-         };
-      }
-      return user;
-    });
-    this.users = updatedUsers;//записываем все измения юзера 
-    this._users$.next([...this.users]); // Обновляем список пользователей в Observable
-    this.users$.subscribe({});//подписка
-  }
-
-}
+//   // Удаление пользователя
+//   deleteUser(id: number): void {
+//     const updatedUsers = this._users$.getValue().filter(user => user.id !== id);
+//     this.setUsers(updatedUsers);
+//   }
+// }
 

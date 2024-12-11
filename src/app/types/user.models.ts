@@ -49,3 +49,7 @@ export interface Company {
   catchPhrase: string;
   bs: string;
 }
+
+export interface UserDialogData extends Partial<User> {
+  isEdit?: boolean; // Флаг для определения режима редактирования
+}

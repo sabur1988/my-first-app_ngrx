@@ -1,6 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { User } from '../../types/user.models';
 import { MatButtonModule } from '@angular/material/button';
+import { AddUserDialogComponent } from '../add-user-dialog/add-user-dialog.component';
+import { LocalStorageService } from 'src/app/servise/local-storage.service';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-users-card',
@@ -10,18 +13,34 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./users-card.component.css']
 })
 export class UsersCardComponent {
-  //@Input — это декоратор, указывает что свойство компонента является входным, 
-  //т.е. значение этого свойства должно быть передано в компонент извне
-  //{required: true} указывает, что это входное свойство является обязательным
-  @Input({required: true}) user!: User;
-
-  //@Output — это декоратор указывает, что свойство компонента является выходным событием.
-  //Это позволяет компоненту эмитировать (отправлять) события
+  @Input({ required: true }) user!: User;
   @Output() deleteUserEvent = new EventEmitter<number>();
+  @Output() editUser = new EventEmitter<User>();
+
+  private dialog = inject(MatDialog);
+  private localStorageService = inject(LocalStorageService);
 
   onDeleteUser(): void {
     this.deleteUserEvent.emit(this.user.id);
   }
 
-}
+  onEditUser(): void {
+    this.editUser.emit(this.user);
+  }
 
+  openEditUserDialog(user: User): void {
+    const dialogRef = this.dialog.open(AddUserDialogComponent, {
+      data: { ...user, isEdit: true }, // Передаем данные пользователя для редактирования
+    });
+
+    dialogRef.afterClosed().subscribe((updatedUser: User) => {
+      if (updatedUser) {
+        const existingUsers = this.localStorageService.getItem('users') || [];
+        const updatedUsers = existingUsers.map((u: User) =>
+          u.id === updatedUser.id ? updatedUser : u
+        );
+        this.localStorageService.setItem('users', updatedUsers);
+      }
+    });
+  }
+}

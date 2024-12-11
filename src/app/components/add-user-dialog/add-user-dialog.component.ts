@@ -4,9 +4,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { UsersService } from '../../servise/users.service';
-import { User } from '../../types/user.models';
-
+//import { UsersService } from '../../servise/users.service';
+import { User, UserDialogData } from '../../types/user.models';
+import { LocalStorageService } from '../../servise/local-storage.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-add-user-dialog',
@@ -18,53 +19,84 @@ import { User } from '../../types/user.models';
     MatButtonModule,
     MatDialogModule,
     ReactiveFormsModule,
+    CommonModule, // Для работы с модулями
   ],
   templateUrl: './add-user-dialog.component.html',
-  styleUrls: ['./add-user-dialog.component.css']
+  styleUrls: ['./add-user-dialog.component.css'],
 })
 export class AddUserDialogComponent {
-  //внедряем сервисы через inject
-  private usersService = inject(UsersService);
+  private fb = inject(FormBuilder); // Формы
+  private dialogRef = inject(MatDialogRef<AddUserDialogComponent>); // Диалоговое окно
+  private localStorageService = inject(LocalStorageService); // LocalStorage
+  //private usersService = inject(UsersService);
 
-  //создаем свойство, в котором сохраняется инстанс FormBuilder
-  //служба Angular Reactive Forms, упрощает создание и управление формами
-  private fb = inject(FormBuilder);
-
-  //создаем свойство, в котором будет храниться ссылка на текущий диалоговый компонент.
-  private dialogRef = inject(MatDialogRef<AddUserDialogComponent>);
-
-  //создаем свойство users$ которое является Observable (потоком данных) из сервиса UsersService
-  public readonly users$ = this.usersService.users$;
-  
-  form: FormGroup;
+  form: FormGroup; // Форма
+  isEdit: boolean; // Флаг редактирования
 
   constructor(
-    //MAT_DIALOG_DATA — это специальный токен, используемый для передачи данных в диалоговое окно.
-    @Inject(MAT_DIALOG_DATA)
-    //data полес типом данных User
-    public data: User
-    ) {
+    @Inject(MAT_DIALOG_DATA) public data: UserDialogData // Используем расширенный интерфейс
+  ) {
+    // Проверка на редактирование и корректная установка значений
+    this.isEdit = this.data?.isEdit || false; // Проверка флага редактирования
+  
+    // Инициализация формы
     this.form = this.fb.group({
-      name: [this.data?.name, Validators.required],//Validators - делает поле обязательным для заполнения 
-      phone: [this.data?.phone, Validators.required],
-      email: [this.data?.email, Validators.required],
-      username: [this.data?.username, Validators.required],
-      website: [this.data?.website],
+      id: [this.data?.id || null], // ID пользователя (если это редактирование, ID будет передано)
+      name: [this.data?.name || '', Validators.required],
+      phone: [this.data?.phone || '', Validators.required],
+      email: [this.data?.email || '', [Validators.required, Validators.email]],
+      username: [this.data?.username || '', Validators.required],
+      website: [this.data?.website || ''],
     });
+  
+    console.log('isEdit:', this.isEdit);  // Для дебага
+    console.log('form data:', this.data); // Проверка данных, полученных через MAT_DIALOG_DATA
   }
-  //метод сохранения Юзеров
-  saveUser(): void {
-    //проверяем, является ли форма допустимой (валидной)
-    if (this.form.valid) {
-      const newUser = this.form.value;//получаем значения, введенные в форму
-      newUser.id = Math.round(Math.random() * 100)// генерируем id
+  
+  
 
-      //вызывает метод close() у dialogRef
-      //и передает данные нового пользователя. 
-      //Эти данные будут возвращены из метода afterClosed() в родительский компонент, 
-      //который открыл диалог.
-      this.dialogRef.close(newUser);
+  /**
+   * Сохранение данных пользователя
+   */
+  saveUser(): void {
+    if (this.form.valid) {
+      const user = this.form.value; // Данные из формы
+      const existingUsers: User[] = this.localStorageService.getItem('users') || [];
+  
+      if (this.isEdit && this.data.id) {
+        // Обновление существующего пользователя
+        const updatedUsers = existingUsers.map((u: User) =>
+          u.id === this.data.id ? { ...u, ...user, id: this.data.id } : u
+        );
+        
+        // Обновление списка пользователей в localStorage
+        this.localStorageService.setItem('users', updatedUsers);
+        
+        // Закрытие диалога с обновленными данными
+        this.dialogRef.close({ ...user, id: this.data.id }); 
+      } else {
+        // Добавление нового пользователя
+        const maxId = existingUsers.length > 0
+          ? Math.max(...existingUsers.map((u: User) => u.id))
+          : 0;
+        const newUser = { ...user, id: maxId + 1 };
+  
+        // Добавление нового пользователя в список
+        existingUsers.push(newUser);
+        this.localStorageService.setItem('users', existingUsers);
+        
+        // Закрытие диалога с новыми данными
+        this.dialogRef.close(newUser);
+      }
     }
   }
+  
 
+  /**
+   * Отмена: закрытие диалогового окна без сохранения
+   */
+  onCancel(): void {
+    this.dialogRef.close();
+  }
 }
+
